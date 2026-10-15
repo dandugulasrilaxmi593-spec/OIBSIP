@@ -1,0 +1,388 @@
+# TASK 2 – Basic Firewall Configuration with UFW
+
+## Basic Firewall Configuration with UFW
+
+### Objective
+
+The objective of this task is to configure a basic firewall on a Linux system using **UFW (Uncomplicated Firewall)**. The firewall is configured to allow and deny specific network traffic and the resulting rules are verified using UFW status commands.
+
+---
+
+## 1. Introduction
+
+A **firewall** is a security mechanism that controls incoming and outgoing network traffic according to predefined rules. It helps protect a computer or network from unauthorized access and unwanted network connections.
+
+**UFW (Uncomplicated Firewall)** is a user-friendly command-line interface for managing firewall rules on Linux systems. It provides a simpler way to configure the Linux firewall compared with directly managing complex firewall rules.
+
+For this task, UFW was configured on a Kali Linux system running in a virtual machine.
+
+---
+
+## 2. Tools and Technologies
+
+- **Operating System:** Kali Linux
+- **Firewall:** UFW (Uncomplicated Firewall)
+- **Terminal:** Linux Terminal
+- **Virtualization:** VirtualBox
+- **Protocols/Ports:** SSH (22), HTTP (80), HTTPS (443), DNS (53)
+
+---
+
+## 3. Installing UFW
+
+First, the package repository was updated:
+
+```bash
+sudo apt update
+```
+
+UFW was then installed using:
+
+```bash
+sudo apt install ufw -y
+```
+
+The installation was verified with:
+
+```bash
+sudo ufw status
+```
+
+---
+
+## 4. Firewall Configuration
+
+### 4.1 Default Incoming Traffic
+
+Incoming traffic was configured to be denied by default:
+
+```bash
+sudo ufw default deny incoming
+```
+
+This provides a secure default policy where incoming connections are blocked unless an explicit rule allows them.
+
+### 4.2 Default Outgoing Traffic
+
+Outgoing traffic was allowed:
+
+```bash
+sudo ufw default allow outgoing
+```
+
+This allows applications on the system to establish normal outbound connections.
+
+---
+
+## 5. Firewall Rules
+
+### Rule 1 – Allow SSH
+
+SSH traffic was allowed using:
+
+```bash
+sudo ufw allow ssh
+```
+
+This allows connections through **TCP port 22**.
+
+SSH is commonly used for remote administration of Linux systems. Allowing SSH ensures that authorized administrators can remotely access the system when required.
+
+---
+
+### Rule 2 – Deny HTTP
+
+HTTP traffic was denied using:
+
+```bash
+sudo ufw deny http
+```
+
+This blocks traffic to **TCP port 80**.
+
+HTTP was denied because unencrypted web traffic can expose information during transmission. Blocking unused services also reduces the number of network services accessible to other systems.
+
+---
+
+### Rule 3 – Allow HTTPS
+
+HTTPS traffic was allowed using:
+
+```bash
+sudo ufw allow https
+```
+
+This allows traffic through **TCP port 443**.
+
+HTTPS is commonly used for secure web communication because it provides encrypted communication between a client and a web server.
+
+---
+
+### Rule 4 – Allow DNS
+
+DNS traffic was allowed using:
+
+```bash
+sudo ufw allow 53
+```
+
+DNS is used to translate domain names into IP addresses. Port 53 is commonly used for DNS communication.
+
+---
+
+## 6. Enabling UFW
+
+After configuring the firewall rules, UFW was enabled:
+
+```bash
+sudo ufw enable
+```
+
+The firewall status was then checked:
+
+```bash
+sudo ufw status verbose
+```
+
+Example configuration:
+
+```text
+Status: active
+
+Default: deny (incoming), allow (outgoing), disabled (routed)
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       Anywhere
+80/tcp                     DENY        Anywhere
+443/tcp                    ALLOW       Anywhere
+53                         ALLOW       Anywhere
+```
+
+The exact output may vary depending on the Linux distribution and existing firewall rules.
+
+---
+
+## 7. Verification of Firewall Rules
+
+The configured rules were verified using:
+
+```bash
+sudo ufw status numbered
+```
+
+The verbose configuration was also checked:
+
+```bash
+sudo ufw status verbose
+```
+
+These commands confirm that UFW is active and that the configured allow and deny rules are present.
+
+---
+
+## 8. Testing the Firewall
+
+The HTTP rule was tested to verify that traffic to port 80 was denied.
+
+First, the system's network information was checked:
+
+```bash
+ip addr
+```
+
+The listening network ports were checked with:
+
+```bash
+sudo ss -tulpn
+```
+
+The UFW rules were then checked:
+
+```bash
+sudo ufw status numbered
+```
+
+The HTTP rule should appear as a deny rule for port 80.
+
+If a web service is running on port 80, an authorized test from another system in the same lab environment can be performed using:
+
+```bash
+curl http://<KALI-IP>
+```
+
+Replace `<KALI-IP>` with the IP address of the Kali Linux machine.
+
+> Note: If no service is listening on port 80, a connection test cannot demonstrate an application-level block because there is no HTTP service running. In that situation, the UFW configuration can still be verified using the firewall status and rule listing.
+
+Only systems owned by the tester or systems for which explicit authorization has been provided should be tested.
+
+---
+
+## 9. UFW Configuration Script
+
+A shell script named `ufw_configuration.sh` was created to apply the firewall configuration automatically.
+
+### Script
+
+```bash
+#!/bin/bash
+
+# Set default firewall policies
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Allow SSH
+sudo ufw allow ssh
+
+# Deny HTTP
+sudo ufw deny http
+
+# Allow HTTPS
+sudo ufw allow https
+
+# Allow DNS
+sudo ufw allow 53
+
+# Enable UFW
+sudo ufw enable
+
+# Display firewall status
+sudo ufw status verbose
+```
+
+The script was made executable using:
+
+```bash
+chmod +x ufw_configuration.sh
+```
+
+The script can then be executed using:
+
+```bash
+./ufw_configuration.sh
+```
+
+This allows the same firewall configuration to be applied consistently.
+
+---
+
+## 10. Why These Rules Were Selected
+
+| Rule | Port | Action | Purpose |
+|---|---:|---|---|
+| SSH | 22 | ALLOW | Allows authorized remote administration |
+| HTTP | 80 | DENY | Blocks unencrypted HTTP traffic |
+| HTTPS | 443 | ALLOW | Allows encrypted web traffic |
+| DNS | 53 | ALLOW | Allows DNS communication |
+| Incoming traffic | — | DENY | Blocks unsolicited incoming connections by default |
+| Outgoing traffic | — | ALLOW | Allows normal outbound communication |
+
+The rules were selected to demonstrate both **allow** and **deny** firewall configurations while maintaining a basic security-oriented default policy.
+
+---
+
+## 11. Security Considerations
+
+The following security practices should be considered when configuring a firewall:
+
+1. Allow only the ports and services that are actually required.
+2. Block unnecessary incoming connections.
+3. Avoid exposing unnecessary network services.
+4. Restrict administrative services such as SSH to trusted networks where possible.
+5. Review firewall rules regularly.
+6. Use encrypted protocols such as HTTPS whenever possible.
+7. Test firewall rules after making configuration changes.
+8. Avoid creating overly broad rules when a more specific rule is possible.
+
+---
+
+## 12. Screenshots
+
+### Screenshot 1 – UFW Status
+
+The following screenshot shows the active UFW firewall and configured rules.
+
+![UFW Status](screenshots/ufw-status.png)
+
+---
+
+### Screenshot 2 – UFW Configuration Script
+
+The following screenshot shows the `ufw_configuration.sh` script being executed.
+
+![UFW Script](screenshots/ufw-script.png)
+
+---
+
+### Screenshot 3 – Firewall Rule Verification
+
+The following screenshot shows the numbered UFW rules.
+
+![UFW Rules](screenshots/firewall-test.png)
+
+---
+
+## 13. Project Structure
+
+```text
+Task-2-UFW-Firewall/
+│
+├── README.md
+├── ufw_configuration.sh
+│
+└── screenshots/
+    ├── ufw-status.png
+    ├── ufw-script.png
+    └── firewall-test.png
+```
+
+---
+
+## 14. Result
+
+The UFW firewall was successfully installed and configured on Kali Linux.
+
+The following configuration was implemented:
+
+- Incoming traffic was denied by default.
+- Outgoing traffic was allowed by default.
+- SSH traffic on port 22 was allowed.
+- HTTP traffic on port 80 was denied.
+- HTTPS traffic on port 443 was allowed.
+- DNS traffic on port 53 was allowed.
+- The firewall rules were verified using UFW status commands.
+- A reusable shell script was created to apply the configuration.
+
+This task demonstrated the basic use of UFW for controlling network traffic on a Linux system.
+
+---
+
+## 15. Conclusion
+
+UFW provides a simple method for managing firewall rules on Linux. By defining default policies and explicitly allowing or denying required services, unnecessary network exposure can be reduced.
+
+The practical configuration in this task demonstrated how firewall rules can be created, enabled, verified, and automated using a shell script.
+
+---
+
+## 16. References
+
+- Ubuntu Community Documentation – UFW:
+  https://help.ubuntu.com/community/UFW
+
+- Ubuntu Manpage – UFW:
+  https://manpages.ubuntu.com/manpages/
+
+- UFW command-line documentation:
+  `man ufw`
+
+- Linux firewall security guidance and best practices were consulted to understand the purpose of restrictive default policies and limiting unnecessary exposed services.
+
+---
+
+## 17. Disclaimer
+
+This firewall configuration was performed in a controlled Linux virtual-machine/lab environment for educational and cybersecurity learning purposes.
+
+Network testing should only be performed against systems that you own or have explicit authorization to test.
