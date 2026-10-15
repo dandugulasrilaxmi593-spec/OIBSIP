@@ -1,0 +1,68 @@
+# Task 1: Basic Network Scanning with Nmap
+
+## Objective
+Perform basic network scanning to identify open ports, running services, and operating system information on an authorized local machine.
+
+## What is Nmap?
+Nmap (Network Mapper) is a free, open-source tool used for network discovery, port scanning, service identification, and security auditing.
+
+## Why Network Scanning Matters
+Network scanning helps administrators identify exposed services, discover unnecessary open ports, review software versions, and improve firewall and system security.
+
+## Tools Used
+- Kali Linux
+- Nmap
+- VirtualBox (if applicable)
+
+## Installation
+Update the package list and install Nmap on Kali Linux:
+
+```bash
+sudo apt update
+sudo apt install nmap -y
+```
+
+Verify the installation:
+
+```bash
+nmap --version
+```
+
+## Scanning Procedure
+Replace `[TARGET_IP]` with the authorized target's actual IP address.
+
+### Basic Scan
+```bash
+nmap [TARGET_IP]
+```
+
+### Service Version Detection
+```bash
+sudo nmap -sV [TARGET_IP]
+```
+
+### Operating System Detection
+```bash
+sudo nmap -O [TARGET_IP]
+```
+
+## Results
+Detailed findings are documented in `nmap_scan_results.txt`.
+
+The report records the actual scan outputs, detected open ports, services, security observations, and recommended mitigations.
+
+## Screenshots
+The `screenshots/` folder contains terminal screenshots showing the Nmap version and scan outputs.
+
+## Ethical Use
+- Scan only systems you own or have explicit permission to test.
+- Use a local machine or authorized virtual machine for practice.
+- Do not scan external or production systems without authorization.
+- Handle discovered service and network information responsibly.
+
+## References
+- Official Nmap Documentation: https://nmap.org/docs.html
+- Nmap Network Scanning Guide: https://nmap.org/book/
+
+## Conclusion
+This task demonstrates basic network reconnaissance and service identification using Nmap. The findings can help identify unnecessary network exposure and guide security improvements.
